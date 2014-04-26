@@ -1,0 +1,23 @@
+#!/bin/bash
+
+if [ "$1x" == "x" ];
+then
+    echo "No directory name specified."
+    exit 1;
+fi
+
+REMOTE_DIRECTORY=/volume1/music/flac/$1
+echo "Creating remote directory: $REMOTE_DIRECTORY."
+ssh vault -x "mkdir $REMOTE_DIRECTORY"
+echo "Copying files to remote directory."
+STORE_IFS=$IFS
+IFS=$(echo -e "\r")
+for i in /tmp/ramdisk/*/*/*;
+do
+    scp $i vault:$REMOTE_DIRECTORY;
+done
+IFS=$STORE_IFS
+ssh vault -x "for i in $REMOTE_DIRECTORY/*; do echo \"Adding \"\$i\" to index.\"; synoindex -a \"\$i\"; done"
+
+exit 0
+
