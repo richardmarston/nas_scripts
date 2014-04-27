@@ -1,13 +1,19 @@
 #!/bin/bash
 
-if [ "$1x" == "x" ];
-then
-    echo "No directory name specified."
+ARTIST=`ls /tmp/ramdisk`
+ALBUM=`ls "/tmp/ramdisk/$ARTIST"`
+ARTIST_NO_SPACES=`echo "$ARTIST" | tr [:blank:] . | sed "s_'_\xe2\x80\x99_"`
+ALBUM_NO_SPACES=`echo "$ALBUM" | tr [:blank:] . | sed "s_'_\xe2\x80\x99_"`
+
+REMOTE_DIRECTORY=/volume1/music/flac/$ARTIST_NO_SPACES-$ALBUM_NO_SPACES
+echo "Creating remote directory: [$REMOTE_DIRECTORY]."
+read -p "Is this ok? " -n 1 -r
+if [[ ! $REPLY =~ ^[Yy]$ ]]
+    then
     exit 1;
 fi
+echo
 
-REMOTE_DIRECTORY=/volume1/music/flac/$1
-echo "Creating remote directory: $REMOTE_DIRECTORY."
 ssh vault -x "mkdir $REMOTE_DIRECTORY"
 echo "Copying files to remote directory."
 STORE_IFS=$IFS
