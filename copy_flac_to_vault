@@ -1,9 +1,9 @@
 #!/bin/bash
 
-ARTIST=`ls /tmp/ramdisk`
-ALBUM=`ls "/tmp/ramdisk/$ARTIST"`
-ARTIST_NO_SPACES=`echo "$ARTIST" | tr [:blank:] . | sed "s_'_\xe2\x80\x99_"`
-ALBUM_NO_SPACES=`echo "$ALBUM" | tr [:blank:] . | sed "s_'_\xe2\x80\x99_"`
+ARTIST=`ls $HOME/Music`
+ALBUM=`ls "$HOME/Music/$ARTIST"`
+ARTIST_NO_SPACES=`echo "$ARTIST" | tr [:blank:] . | sed 's/&/and/g' | sed "s_'_\xe2\x80\x99_g"`
+ALBUM_NO_SPACES=`echo "$ALBUM" | tr [:blank:] . | sed 's/&/and/g' | sed "s_'_\xe2\x80\x99_g"`
 
 REMOTE_DIRECTORY=/volume1/music/flac/$ARTIST_NO_SPACES-$ALBUM_NO_SPACES
 echo "Creating remote directory: [$REMOTE_DIRECTORY]."
@@ -14,16 +14,21 @@ if [[ ! $REPLY =~ ^[Yy]$ ]]
 fi
 echo
 
-ssh vault -x "mkdir $REMOTE_DIRECTORY"
+ssh vault -x "mkdir $REMOTE_DIRECTORY" || { echo "Failed to make $REMOTE_DIRECTORY on vault. Exiting."; exit 1; };
 echo "Copying files to remote directory."
 STORE_IFS=$IFS
 IFS=$(echo -e "\r")
-for i in /tmp/ramdisk/*/*/*;
+for i in $HOME/Music/*/*/*;
 do
-    scp $i vault:$REMOTE_DIRECTORY;
+    scp $i vault:$REMOTE_DIRECTORY || { echo "Failed to copy $i to vault. Exiting."; exit 1; };
 done
 IFS=$STORE_IFS
 ssh vault -x "for i in $REMOTE_DIRECTORY/*; do echo \"Adding \"\$i\" to index.\"; synoindex -a \"\$i\"; done"
-
+read -p "Delete $HOME/Music/$ARTIST?" -n 1 -r
+if [[ $REPLY =~ ^[Yy]$ ]]
+then
+    rm -rf "$HOME/Music/$ARTIST"
+fi
+echo
 exit 0
 
