@@ -3,7 +3,7 @@
 ARTIST=`ls $HOME/Music`
 ALBUM=`ls "$HOME/Music/$ARTIST"`
 ARTIST_NO_SPACES=`echo "$ARTIST" | tr [:blank:] . | sed 's/&/and/g' | sed "s_'_\xe2\x80\x99_g"`
-ALBUM_NO_SPACES=`echo "$ALBUM" | tr [:blank:] . | sed 's/&/and/g' | sed "s_'_\xe2\x80\x99_g"`
+ALBUM_NO_SPACES=`echo "$ALBUM" | tr [:blank:] . | sed 's/&/and/g' | sed "s_'_\xe2\x80\x99_g" | sed 's/(/\\(/g'`
 
 REMOTE_DIRECTORY=/volume1/music/flac/$ARTIST_NO_SPACES-$ALBUM_NO_SPACES
 echo "Creating remote directory: [$REMOTE_DIRECTORY]."
